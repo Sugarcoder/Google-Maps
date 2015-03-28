@@ -28,6 +28,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -44,13 +45,9 @@ public class MapDemoActivity extends FragmentActivity implements
         GoogleMap.OnMapLongClickListener {
 
 
-	private SupportMapFragment mapFragment;
+	private MapFragment mapFragment;
 	private GoogleMap map;
 	private GoogleApiClient mGoogleApiClient;
-	private LocationRequest mLocationRequest;
-	private long UPDATE_INTERVAL = 60000;  /* 60 secs */
-	private long FASTEST_INTERVAL = 5000; /* 5 secs */
-
 
 
 	/*
@@ -59,26 +56,36 @@ public class MapDemoActivity extends FragmentActivity implements
 	 */
 
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-
+    private CameraUpdate update;
+    private EditText mLatitudeText;
+    private EditText mLongitudeText;
 
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.map_demo_activity);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.map_demo_activity);
+    }
 
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(GoogleMap map) {
-                    loadMap(map);
-                }
-            });
+    protected void setUpMapIfNeeded() {
+
+        // Do a null check to confirm that we have not already instantiated the map.
+
+        if (mapFragment == null) {
+
+            mapFragment = ((MapFragment) getFragmentManager().findFragmentById(R.id.map));
+
+            // Check if we were successful in obtaining the map.
+            if (mapFragment != null) {
+                mapFragment.getMapAsync(new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(GoogleMap map) {
+                        loadMap(map);
+                    }
+                });
+            }
         }
-           // else { Toast.makeText(this, "Error - Map Fragment was null!", Toast.LENGTH_SHORT).show(); }
-
-	}
-
+    }
 
 
     protected void loadMap(GoogleMap googleMap) {
@@ -101,6 +108,21 @@ public class MapDemoActivity extends FragmentActivity implements
             Toast.makeText(this, "Error - Map was null!!", Toast.LENGTH_SHORT).show();
         }
     }
+
+
+    /*
+    public final void moveCamera(CameraUpdate update) {
+        this.update = update;
+
+        LatLng latLng = new LatLng(latitude, longitude);
+
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
+
+        map.animateCamera(cameraUpdate);
+
+    }
+    */
+
 
 
     @Override
@@ -261,16 +283,15 @@ public class MapDemoActivity extends FragmentActivity implements
 	@Override
 	public void onConnected(Bundle dataBundle) {
 		// Display the connection status
-		Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-		if (location != null) {
-			Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT).show();
+		Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+		if (mLastLocation != null) {
+            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
+            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
+			// Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT).show();
 
-			LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-			map.animateCamera(cameraUpdate);
-            startLocationUpdates();
+
         } else {
-			Toast.makeText(this, "Current location was null, enable GPS on emulator!", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Current location was null, you need to enable GPS on emulator", Toast.LENGTH_SHORT).show();
 		}
 
 	}
@@ -278,9 +299,11 @@ public class MapDemoActivity extends FragmentActivity implements
 
 
     protected void startLocationUpdates() {
-        mLocationRequest = new LocationRequest();
+        LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        long UPDATE_INTERVAL = 60000;
         mLocationRequest.setInterval(UPDATE_INTERVAL);
+        long FASTEST_INTERVAL = 5000;
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
                 mLocationRequest, this);
