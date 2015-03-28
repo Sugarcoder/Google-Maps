@@ -55,7 +55,7 @@ public class MapDemoActivity extends FragmentActivity implements
 	 */
 
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    private GoogleApiClient client;
+
 
 
     @Override
@@ -87,7 +87,7 @@ public class MapDemoActivity extends FragmentActivity implements
             map.setOnMapLongClickListener(this);
 
 
-            // Now that map has loaded, let's get our location!
+            // Now that map has loaded, let's get our location
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
