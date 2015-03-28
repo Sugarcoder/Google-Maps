@@ -1,6 +1,6 @@
 # Google Maps 
 This is a Google Maps API application. 
-This app helps us test if we have the play services properly setup on our emulator. 
+This app is for testing if Google play services is properly set up on the emulator. 
 
 ### Features:
 
