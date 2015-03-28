@@ -82,6 +82,7 @@ public class MapDemoActivity extends FragmentActivity implements
         if (map != null) {
             // Map is ready
             Toast.makeText(this, "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
+
             map.setMyLocationEnabled(true);
 
             map.setOnMapLongClickListener(this);
@@ -276,8 +277,6 @@ public class MapDemoActivity extends FragmentActivity implements
 
 
 
-
-
     protected void startLocationUpdates() {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
@@ -286,6 +285,7 @@ public class MapDemoActivity extends FragmentActivity implements
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
                 mLocationRequest, this);
     }
+
 
     public void onLocationChanged(Location location) {
         // Report to the UI that the location was updated
@@ -300,6 +300,8 @@ public class MapDemoActivity extends FragmentActivity implements
      * Called by Location Services if the connection to the location client
      * drops because of an error.
      */
+
+
     @Override
     public void onConnectionSuspended(int i) {
         if (i == CAUSE_SERVICE_DISCONNECTED) {
@@ -309,9 +311,11 @@ public class MapDemoActivity extends FragmentActivity implements
         }
     }
 
-	/*
+	 /*
 	 * Called by Location Services if the attempt to Location Services fails.
 	 */
+
+
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
 		/*
@@ -338,6 +342,7 @@ public class MapDemoActivity extends FragmentActivity implements
 		}
 	}
 
+
 	// Define a DialogFragment that displays the error dialog
 	public static class ErrorDialogFragment extends DialogFragment {
 
@@ -350,10 +355,12 @@ public class MapDemoActivity extends FragmentActivity implements
 			mDialog = null;
 		}
 
+
 		// Set the dialog to display
 		public void setDialog(Dialog dialog) {
 			mDialog = dialog;
 		}
+
 
 		// Return a Dialog to the DialogFragment.
 		@Override
