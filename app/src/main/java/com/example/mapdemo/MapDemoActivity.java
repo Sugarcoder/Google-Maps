@@ -55,9 +55,10 @@ public class MapDemoActivity extends FragmentActivity implements
 	 */
 
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    private GoogleApiClient client;
 
 
-	@Override
+    @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_demo_activity);
@@ -72,9 +73,7 @@ public class MapDemoActivity extends FragmentActivity implements
         }
            // else { Toast.makeText(this, "Error - Map Fragment was null!", Toast.LENGTH_SHORT).show(); }
 
-
 	}
-
 
 
 
@@ -92,7 +91,9 @@ public class MapDemoActivity extends FragmentActivity implements
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this).build();
+                    .addOnConnectionFailedListener(this)
+                    .build();
+
 
 
             connectClient();
@@ -196,6 +197,7 @@ public class MapDemoActivity extends FragmentActivity implements
 		Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 		if (location != null) {
 			Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT).show();
+
 			LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
 			map.animateCamera(cameraUpdate);
@@ -203,11 +205,13 @@ public class MapDemoActivity extends FragmentActivity implements
         } else {
 			Toast.makeText(this, "Current location was null, enable GPS on emulator!", Toast.LENGTH_SHORT).show();
 		}
+
 	}
 
 
-    @Override
 
+
+    @Override
     public void onMapLongClick(final LatLng point) {
         Toast.makeText(this, "Long Press", Toast.LENGTH_LONG).show();
         showAlertDialogForPoint(point);
