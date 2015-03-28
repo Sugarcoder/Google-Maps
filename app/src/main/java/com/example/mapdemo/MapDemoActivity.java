@@ -2,7 +2,9 @@ package com.example.mapdemo;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.app.Dialog;
 import android.content.Intent;
@@ -49,6 +51,8 @@ public class MapDemoActivity extends FragmentActivity implements
 	private long UPDATE_INTERVAL = 60000;  /* 60 secs */
 	private long FASTEST_INTERVAL = 5000; /* 5 secs */
 
+
+
 	/*
 	 * Define a request code to send to Google Play services This code is
 	 * returned in Activity.onActivityResult
@@ -82,11 +86,8 @@ public class MapDemoActivity extends FragmentActivity implements
         if (map != null) {
             // Map is ready
             Toast.makeText(this, "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
-
             map.setMyLocationEnabled(true);
-
             map.setOnMapLongClickListener(this);
-
 
             // Now that map has loaded, let's get our location
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -95,13 +96,77 @@ public class MapDemoActivity extends FragmentActivity implements
                     .addOnConnectionFailedListener(this)
                     .build();
 
-
-
             connectClient();
         } else {
             Toast.makeText(this, "Error - Map was null!!", Toast.LENGTH_SHORT).show();
         }
     }
+
+
+    @Override
+    public void onMapLongClick(LatLng point) {
+        // Toast.makeText(this, "Long Press", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Long Press", Toast.LENGTH_LONG).show();
+        showAlertDialogForPoint(point);
+    }
+
+
+
+    // Display the alert that adds the marker
+
+    private void showAlertDialogForPoint(final LatLng point) {
+
+        // inflate message_item.xml view
+        View messageView = LayoutInflater.from(MapDemoActivity.this).
+                inflate(R.layout.message_item, null);
+
+        // Create alert dialog builder
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        // set message_item.xml to AlertDialog builder
+        alertDialogBuilder.setView(messageView);
+
+        // Create alert dialog
+        final AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // Configure dialog button (OK)
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        // Define color of marker icon
+                        BitmapDescriptor defaultMarker =
+                                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
+
+                        // Extract content from alert dialog
+                        String title = ((EditText) alertDialog.findViewById(R.id.etTitle)).
+                                getText().toString();
+
+                        String snippet = ((EditText) alertDialog.findViewById(R.id.etSnippet)).
+                                getText().toString();
+
+                        // Creates and adds marker to the map
+                        Marker marker = map.addMarker(new MarkerOptions()
+                                .position(point)
+                                .title(title)
+                                .snippet(snippet)
+                                .icon(defaultMarker));
+                    }
+                });
+
+
+        // Configure dialog button (Cancel)
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) { dialog.cancel(); }
+                });
+
+
+        // Display the dialog
+        alertDialog.show();
+    }
+
 
 
     protected void connectClient() {
@@ -192,6 +257,7 @@ public class MapDemoActivity extends FragmentActivity implements
 	 */
 
 
+
 	@Override
 	public void onConnected(Bundle dataBundle) {
 		// Display the connection status
@@ -208,72 +274,6 @@ public class MapDemoActivity extends FragmentActivity implements
 		}
 
 	}
-
-
-
-
-    @Override
-    public void onMapLongClick(final LatLng point) {
-        Toast.makeText(this, "Long Press", Toast.LENGTH_LONG).show();
-        showAlertDialogForPoint(point);
-    }
-
-
-
-    // Display the alert that adds the marker
-
-    private void showAlertDialogForPoint(final LatLng point) {
-
-        // inflate message_item.xml view
-        View messageView = LayoutInflater.from(MapDemoActivity.this).
-                inflate(R.layout.message_item, null);
-
-        // Create alert dialog builder
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-        // set message_item.xml to AlertDialog builder
-        alertDialogBuilder.setView(messageView);
-
-        // Create alert dialog
-        final AlertDialog alertDialog = alertDialogBuilder.create();
-
-        // Configure dialog button (OK)
-        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        // Define color of marker icon
-                        BitmapDescriptor defaultMarker =
-                                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
-
-                        // Extract content from alert dialog
-                        String title = ((EditText) alertDialog.findViewById(R.id.etTitle)).
-                                getText().toString();
-
-                        String snippet = ((EditText) alertDialog.findViewById(R.id.etSnippet)).
-                                getText().toString();
-
-                        // Creates and adds marker to the map
-                        Marker marker = map.addMarker(new MarkerOptions()
-                                .position(point)
-                                .title(title)
-                                .snippet(snippet)
-                                .icon(defaultMarker));
-                    }
-                });
-
-
-
-        // Configure dialog button (Cancel)
-        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) { dialog.cancel(); }
-                });
-
-        // Display the dialog
-        alertDialog.show();
-    }
 
 
 
@@ -295,6 +295,7 @@ public class MapDemoActivity extends FragmentActivity implements
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 
     }
+
 
     /*
      * Called by Location Services if the connection to the location client
