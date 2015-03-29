@@ -45,9 +45,9 @@ public class MapDemoActivity extends FragmentActivity implements
         GoogleMap.OnMapLongClickListener {
 
 
-	private MapFragment mapFragment;
-	private GoogleMap map;
-	private GoogleApiClient mGoogleApiClient;
+    private MapFragment mapFragment;
+    private GoogleMap map;
+    private GoogleApiClient mGoogleApiClient;
 
 
 	/*
@@ -55,17 +55,28 @@ public class MapDemoActivity extends FragmentActivity implements
 	 * returned in Activity.onActivityResult
 	 */
 
-	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private CameraUpdate update;
     private EditText mLatitudeText;
     private EditText mLongitudeText;
 
 
     @Override
-	protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map_demo_activity);
+
     }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+
+    }
+
 
     protected void setUpMapIfNeeded() {
 
@@ -96,12 +107,7 @@ public class MapDemoActivity extends FragmentActivity implements
             map.setMyLocationEnabled(true);
             map.setOnMapLongClickListener(this);
 
-            // Now that map has loaded, let's get our location
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
+
 
             connectClient();
         } else {
