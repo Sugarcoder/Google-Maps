@@ -282,7 +282,7 @@ public class MapDemoActivity extends FragmentActivity implements
 
 
 	@Override
-	public void onConnected(Bundle dataBundle) {
+	public void onConnected(Bundle connectionHint) {     // 'Bundle dataBundle' works too
 		// Display the connection status
 		Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 		if (mLastLocation != null) {
