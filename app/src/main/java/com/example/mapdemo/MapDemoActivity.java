@@ -21,21 +21,22 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 
 
 public class MapDemoActivity extends FragmentActivity implements
@@ -49,16 +50,16 @@ public class MapDemoActivity extends FragmentActivity implements
     private GoogleMap map;
     private GoogleApiClient mGoogleApiClient;
 
+	/* Define a request code to send to Google Play services This code is
+	 * returned in Activity.onActivityResult */
 
-	/*
-	 * Define a request code to send to Google Play services This code is
-	 * returned in Activity.onActivityResult
-	 */
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private CameraUpdate update;
     private EditText mLatitudeText;
     private EditText mLongitudeText;
+    private ConnectionCallbacks connectionCallbacks;
+    private boolean mResolvingError;
 
 
     @Override
@@ -68,7 +69,7 @@ public class MapDemoActivity extends FragmentActivity implements
 
     }
 
-    protected synchronized void buildGoogleApiClient() {
+    public synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -83,7 +84,6 @@ public class MapDemoActivity extends FragmentActivity implements
         // Do a null check to confirm that we have not already instantiated the map.
 
         if (mapFragment == null) {
-
             mapFragment = ((MapFragment) getFragmentManager().findFragmentById(R.id.map));
 
             // Check if we were successful in obtaining the map.
@@ -108,7 +108,6 @@ public class MapDemoActivity extends FragmentActivity implements
             map.setOnMapLongClickListener(this);
 
 
-
             connectClient();
         } else {
             Toast.makeText(this, "Error - Map was null!!", Toast.LENGTH_SHORT).show();
@@ -119,16 +118,11 @@ public class MapDemoActivity extends FragmentActivity implements
     /*
     public final void moveCamera(CameraUpdate update) {
         this.update = update;
-
         LatLng latLng = new LatLng(latitude, longitude);
-
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
-
         map.animateCamera(cameraUpdate);
-
     }
     */
-
 
 
     @Override
@@ -213,6 +207,7 @@ public class MapDemoActivity extends FragmentActivity implements
     protected void onStart() {
         super.onStart();
         connectClient();
+
     }
 
     /*
@@ -253,7 +248,7 @@ public class MapDemoActivity extends FragmentActivity implements
 	}
 
 
-	private boolean isGooglePlayServicesAvailable() {
+	public boolean isGooglePlayServicesAvailable() {
 		// Check that Google Play services is available
 		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 		// If Google Play services is available
@@ -333,10 +328,10 @@ public class MapDemoActivity extends FragmentActivity implements
 
 
     @Override
-    public void onConnectionSuspended(int i) {
-        if (i == CAUSE_SERVICE_DISCONNECTED) {
+    public void onConnectionSuspended(int cause) {
+        if (cause == CAUSE_SERVICE_DISCONNECTED) {
             Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
-        } else if (i == CAUSE_NETWORK_LOST) {
+        } else if (cause == CAUSE_NETWORK_LOST) {
             Toast.makeText(this, "Network lost. Please re-connect.", Toast.LENGTH_SHORT).show();
         }
     }
