@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.location.Criteria;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.app.Dialog;
@@ -19,6 +20,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.ErrorDialogFragment;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -47,7 +49,7 @@ public class MapDemoActivity extends FragmentActivity implements
 
 
     private MapFragment mapFragment;
-    private GoogleMap map;
+    private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
 
 	/* Define a request code to send to Google Play services This code is
@@ -60,6 +62,8 @@ public class MapDemoActivity extends FragmentActivity implements
     private EditText mLongitudeText;
     private ConnectionCallbacks connectionCallbacks;
     private boolean mResolvingError;
+    private Object client;
+    private Location mLastLocation;
 
 
     @Override
@@ -67,7 +71,10 @@ public class MapDemoActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map_demo_activity);
 
+
     }
+
+
 
     public synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -100,12 +107,12 @@ public class MapDemoActivity extends FragmentActivity implements
 
 
     protected void loadMap(GoogleMap googleMap) {
-        map = googleMap;
-        if (map != null) {
+
+        if (mMap != null) {
             // Map is ready
             Toast.makeText(this, "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
-            map.setMyLocationEnabled(true);
-            map.setOnMapLongClickListener(this);
+            mMap.setOnMapLongClickListener(this);
+            mMap.setMyLocationEnabled(true);
 
 
             connectClient();
@@ -169,7 +176,7 @@ public class MapDemoActivity extends FragmentActivity implements
                                 getText().toString();
 
                         // Creates and adds marker to the map
-                        Marker marker = map.addMarker(new MarkerOptions()
+                        Marker marker = mMap.addMarker(new MarkerOptions()
                                 .position(point)
                                 .title(title)
                                 .snippet(snippet)
@@ -284,18 +291,31 @@ public class MapDemoActivity extends FragmentActivity implements
 	@Override
 	public void onConnected(Bundle connectionHint) {     // 'Bundle dataBundle' works too
 		// Display the connection status
-		Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-		if (mLastLocation != null) {
-            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
-			// Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT).show();
 
 
-        } else {
-			Toast.makeText(this, "Current location was null, you need to enable GPS on emulator", Toast.LENGTH_SHORT).show();
-		}
 
-	}
+
+
+        /* Location temp = getLastLocation(client);
+        mLastLocation = temp;
+        */
+
+            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLastLocation != null) {
+                mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
+                mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
+                // Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT).show();
+
+
+            } else {
+                Toast.makeText(this, "Current location was null, you need to enable GPS on emulator", Toast.LENGTH_SHORT).show();
+            }
+    }
+
+
+    public Location getLastLocation(GoogleApiClient client) {
+        return mLastLocation;
+    }
 
 
 
@@ -306,9 +326,9 @@ public class MapDemoActivity extends FragmentActivity implements
         mLocationRequest.setInterval(UPDATE_INTERVAL);
         long FASTEST_INTERVAL = 5000;
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
-                mLocationRequest, this);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
+
 
 
     public void onLocationChanged(Location location) {
